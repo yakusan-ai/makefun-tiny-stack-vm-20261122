@@ -1,22 +1,16 @@
 import{readdirSync as ls,readFileSync as read,writeFileSync as write,mkdirSync as mkdir}from'node:fs';
 const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output';
+const T=[];
+for(const[v,ops]of[[0,[0,48,51,52]],[1,[1,2,82]],[4,[3,49,50,80,81,83]],[6,[4]],[10,[5]],[11,[6]],[15,[7]],[5,[23,27,64]],[9,[16,17,18,19,20,21,22,24,25,26,28,29,30,32,33,34]],[8,[65]]])for(const op of ops)T[op]=v;
 for(const id of ls(I,{withFileTypes:true}).filter(d=>d.isDirectory()).map(d=>d.name).sort()){
 const p=read(I+'/'+id+'/program.bin'),input=read(I+'/'+id+'/input.bin'),s=[],c=[],m=new Int32Array(256),out=Buffer.alloc(65536);
 let pc=0,t=0,ip=0,n=0,e=0;
 for(;;){
 if(t===1000000){e=10;break}if(pc<0||pc>=p.length){e=9;break}
 let op=p[pc++],k=op===1?1:op===2?4:op>=48&&op<=51?2:0;
-let pop=0,push=0;
-if(op===1||op===2||op===82)push=1;
-else if(op===3||op===49||op===50||op===80||op===81||op===83)pop=1;
-else if(op===4){pop=1;push=2}
-else if(op===5){pop=push=2}
-else if(op===6){pop=2;push=3}
-else if(op===7){pop=push=3}
-else if(op===23||op===27||op===64){pop=push=1}
-else if(op>=16&&op<=30||op>=32&&op<=34){pop=2;push=1}
-else if(op===65)pop=2;
-else if(![0,48,51,52].includes(op)){e=5;break}
+const needs=T[op];
+if(needs===undefined){e=5;break}
+const pop=needs>>2,push=needs&3;
 if(pc+k>p.length){e=9;break}t++;
 if(s.length<pop){e=2;break}if(s.length-pop+push>256){e=3;break}
 let v=k===1?p.readInt8(pc):k===4?p.readInt32LE(pc):k===2?p.readUInt16LE(pc):0;pc+=k;
